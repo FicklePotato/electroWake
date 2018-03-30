@@ -9,7 +9,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /*
@@ -17,18 +22,19 @@ import java.io.IOException;
     TODO: change this to two buttons, record and stop record
     TODO: while recording, display a timer
     TODO: translate the sound file into an array of integers - use only the amount of data needed for voice recognition
-    FIXME: I THE RECORDING DOES NOT SAVE TO THE FUCKING FILE
      */
 
 public class VoiceRecordingActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "AudioRecord";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private static final String AUDIO_ENDING = ".3gp";
+    private static final String REGEX_NUMBER = "_\\d_";
 
     private MediaRecorder mRecorder = null;
     private boolean permissionToRecordAccepted = false;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
-
+    private Pattern numReg = Pattern.compile(REGEX_NUMBER);
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -53,12 +59,40 @@ public class VoiceRecordingActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    private String getAudioPath(){
+        String outPath = "%s/Audio_%d_%s%s";
+        Date currentTime = Calendar.getInstance().getTime();
+        String outDir = getExternalCacheDir().getAbsolutePath();
+        outPath = String.format(outPath, outDir, 0, currentTime.toString(), AUDIO_ENDING);
+        if (!new File(outPath).exists()){
+            return outPath;
+        }
+        else {
+            return getAudioPath(outPath);
+        }
+    }
+
+    private String getAudioPath(String prevPath){
+        Matcher m = numReg.matcher(prevPath);
+        int prevNum = 1;
+        while (m.find()){
+            prevNum = Integer.parseInt(m.group(1).replaceAll("_", ""));
+        }
+        String newPath = prevPath.replaceFirst(REGEX_NUMBER, String.format("_%d_", Integer.toString(prevNum + 1)));
+        if (!new File(newPath).exists()){
+            return newPath;
+        }
+        else {
+            return getAudioPath(newPath);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
+        // FYI: there is a bug in some android systems where the file does not get saved until you unplug the device.
         super.onCreate(savedInstanceState);
         // TODO: Understand paths
-        String mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
+        String mFileName = getAudioPath();
         Log.e(LOG_TAG, "Logging to " + mFileName);
         setContentView(R.layout.activity_voice_recording);
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
