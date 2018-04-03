@@ -11,8 +11,11 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +33,7 @@ public class VoiceRecordingActivity extends AppCompatActivity {
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static final String AUDIO_ENDING = ".3gp";
     private static final String REGEX_NUMBER = "_\\d_";
+    private static final DateFormat DF = new SimpleDateFormat("dd-MM_HH:mm", Locale.US);
 
     private MediaRecorder mRecorder = null;
     private boolean permissionToRecordAccepted = false;
@@ -62,8 +66,9 @@ public class VoiceRecordingActivity extends AppCompatActivity {
     private String getAudioPath(){
         String outPath = "%s/Audio_%d_%s%s";
         Date currentTime = Calendar.getInstance().getTime();
+        // TODO: there are potential bugs here for the lack of checks and because we dont check that there is only one instance of _\d_
         String outDir = getExternalCacheDir().getAbsolutePath();
-        outPath = String.format(outPath, outDir, 0, currentTime.toString(), AUDIO_ENDING);
+        outPath = String.format(Locale.US, outPath, outDir, 0, DF.format(currentTime), AUDIO_ENDING);
         if (!new File(outPath).exists()){
             return outPath;
         }
@@ -76,9 +81,9 @@ public class VoiceRecordingActivity extends AppCompatActivity {
         Matcher m = numReg.matcher(prevPath);
         int prevNum = 1;
         while (m.find()){
-            prevNum = Integer.parseInt(m.group(1).replaceAll("_", ""));
+            prevNum = Integer.parseInt(m.group(0).replaceAll("_", ""));
         }
-        String newPath = prevPath.replaceFirst(REGEX_NUMBER, String.format("_%d_", Integer.toString(prevNum + 1)));
+        String newPath = prevPath.replaceFirst(REGEX_NUMBER, String.format(Locale.US, "_%d_", prevNum + 1));
         if (!new File(newPath).exists()){
             return newPath;
         }
@@ -93,7 +98,7 @@ public class VoiceRecordingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // TODO: Understand paths
         String mFileName = getAudioPath();
-        Log.e(LOG_TAG, "Logging to " + mFileName);
+        Log.e(LOG_TAG, "Write to " + mFileName);
         setContentView(R.layout.activity_voice_recording);
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         mRecorder = new MediaRecorder();
