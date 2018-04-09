@@ -18,4 +18,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, VoiceRecordingActivity.class);
         startActivity(intent);
     }
+
+    public void bluetooth(View view){
+        // TODO: what ever the fuck is written here https://developer.android.com/guide/topics/connectivity/bluetooth-le.html
+    }
 }

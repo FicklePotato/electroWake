@@ -2,5 +2,6 @@
     <string name="app_name" translatable="false">ElctroWake</string>
     <string name="input">Write some shit down</string>
     <string name="trademark">brought to you by T&amp;T</string>
-    <string name="fucking_button">Press this muthafucka</string>
+    <string name="record_button">Record</string>
+    <string name="bluetooth_button">Bluetooth</string>
 </resources>
