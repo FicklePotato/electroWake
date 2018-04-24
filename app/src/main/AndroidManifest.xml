@@ -3,6 +3,12 @@
     package="brasnore.elctrowake">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -27,7 +33,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".VoiceRecordingActivity"></activity>
+        <activity android:name=".VoiceRecordingActivity" />
+        <activity android:name=".BluetoothActivity"></activity>
     </application>
 
 </manifest>

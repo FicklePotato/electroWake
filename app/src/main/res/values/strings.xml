@@ -4,4 +4,5 @@
     <string name="trademark">brought to you by T&amp;T</string>
     <string name="record_button">Record</string>
     <string name="bluetooth_button">Bluetooth</string>
+    <string name="ble_not_supported">Ble must be supported on device to operate!</string>
 </resources>
