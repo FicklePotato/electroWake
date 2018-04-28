@@ -96,9 +96,6 @@ public class VoiceRecordingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         // FYI: there is a bug in some android systems where the file does not get saved until you unplug the device.
         super.onCreate(savedInstanceState);
-        // TODO: Understand paths
-        String mFileName = getAudioPath();
-        Log.e(LOG_TAG, "Write to " + mFileName);
         setContentView(R.layout.activity_voice_recording);
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         mRecorder = new MediaRecorder();
@@ -110,6 +107,11 @@ public class VoiceRecordingActivity extends AppCompatActivity {
 
         // TODO: what audio encoder do we want?
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+    }
+    protected void onResume(){
+        super.onResume();
+        String mFileName = getAudioPath();
+        Log.e(LOG_TAG, "Write to " + mFileName);
         mRecorder.setOutputFile(mFileName);
         try{
             mRecorder.prepare();

@@ -8,11 +8,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 
-@TargetApi(20)
+@TargetApi(23)
 public class MainActivity extends AppCompatActivity {
 
     static public final int REQUEST_ENABLE_BT = 3;
@@ -40,6 +41,12 @@ public class MainActivity extends AppCompatActivity {
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+        else{
+            Intent intent = new Intent(this, BluetoothActivity.class);
+            // TODO: use start activity for result instead, to connect to a device and return the connection or some shit
+            // todo: add another activity and button after ive connected, to send some date to the bracelet
+            startActivity(intent);
         }
     }
 }

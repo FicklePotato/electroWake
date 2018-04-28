@@ -54,7 +54,6 @@ public class BluetoothActivity extends AppCompatActivity {
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
-
     }
 
     @Override
@@ -151,7 +150,12 @@ public class BluetoothActivity extends AppCompatActivity {
 
         @Override
         public void onScanFailed(int errorCode) {
+            if (errorCode == SCAN_FAILED_ALREADY_STARTED){
+                Log.i("Scan error", "Tried scanning while another scan was running");
+            }
+            else{
             Log.e("Scan Failed", "Error Code: " + errorCode);
+            }
         }
     };
 
