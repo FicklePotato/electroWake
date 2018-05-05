@@ -8,21 +8,28 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import brasnore.elctrowake.bluetooth.bluetoothInit;
 
 
 @TargetApi(23)
 public class MainActivity extends AppCompatActivity {
 
     static public final int REQUEST_ENABLE_BT = 3;
+    private static Context context;
 
     public static final String EXTRA_MESSAGE = "LOL";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        MainActivity.context = getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    public static Context getAppContext() {
+        return MainActivity.context;
     }
 
     public void recordAudio(View view) {
@@ -30,9 +37,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // Initiate a bluetooth connection, and run a simple check to send data
     public void bluetooth(View view){
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
+            Toast.makeText(this, R.string.bluetooth_not_supported, Toast.LENGTH_SHORT).show();
         }
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         final BluetoothAdapter mBluetoothAdapter = bluetoothManager.getAdapter();
@@ -43,10 +51,13 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         else{
-            Intent intent = new Intent(this, BluetoothActivity.class);
-            // TODO: use start activity for result instead, to connect to a device and return the connection or some shit
-            // todo: add another activity and button after ive connected, to send some date to the bracelet
+            Intent intent = new Intent(this, bluetoothInit.class);
             startActivity(intent);
         }
+    }
+
+    public void sendBTSignal(View view){
+        // TODO: this will be the part where we tell the bracelet to elctrocute
+        // TODO: preform a check on whether we are connected, if not, show a warning
     }
 }
