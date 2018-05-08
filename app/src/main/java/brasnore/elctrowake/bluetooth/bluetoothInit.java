@@ -7,11 +7,12 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
+import android.content.DialogInterface.OnDismissListener;
 import brasnore.elctrowake.R;
 
 import android.bluetooth.BluetoothAdapter;
@@ -22,8 +23,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @TargetApi(21)
@@ -37,7 +40,7 @@ public class bluetoothInit extends ListActivity
     /* Discovery is Finished */
     private volatile boolean _discoveryFinished = false;
     private static final int REQUEST_COARSE_LOCATION = 999;
-
+    private List<String> ALLOWED_DEVICES = Arrays.asList("34:02:86:21:AF:F1");
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -54,8 +57,6 @@ public class bluetoothInit extends ListActivity
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_COARSE_LOCATION);
         }
-        //Intent enabler = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        //startActivityForResult(enabler, REQUEST_DISCOVERABLE);
     }
 
     /* Enable BT */
@@ -89,6 +90,7 @@ public class bluetoothInit extends ListActivity
          */
         private BroadcastReceiver _foundReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
+                // TODO: only add out devices
                 Log.d("BT", "found receiver");
 			/* get the search results */
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -115,6 +117,7 @@ public class bluetoothInit extends ListActivity
         protected void discover()
         {
 		/* Register Receiver*/
+            Toast.makeText(this, "searching for devices", Toast.LENGTH_SHORT).show();
             IntentFilter discoveryFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
             registerReceiver(_discoveryReceiver, discoveryFilter);
                 IntentFilter foundFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -127,11 +130,36 @@ public class bluetoothInit extends ListActivity
                 }
             };
             dicoverThread.start();
-            for (; _bluetooth.isDiscovering();) {
-                _bluetooth.cancelDiscovery();
-            }
+            BluetoothUtils.indeterminate(this, _handler, "Scanning...", _discoveryWorker, new OnDismissListener() {
+                public void onDismiss(DialogInterface dialog)
+                {
+
+                    for (; _bluetooth.isDiscovering();)
+                    {
+
+                        _bluetooth.cancelDiscovery();
+                    }
+
+                    _discoveryFinished = true;
+                }
+            }, true);
+//            for (; _bluetooth.isDiscovering();) {
+//                _bluetooth.cancelDiscovery();
+//            }
         }
 
+
+        private boolean DeviceAllowed(BluetoothDevice dev){
+            boolean contains = false;
+            String mac = dev.getAddress();
+            for (String item : ALLOWED_DEVICES) {
+                if (mac.equalsIgnoreCase(item)) {
+                    contains = true;
+                    break; // No need to look further.
+                }
+            }
+            return contains;
+        }
 
         /* Show devices list */
         protected void showDevices()
@@ -141,6 +169,9 @@ public class bluetoothInit extends ListActivity
             {
                 StringBuilder b = new StringBuilder();
                 BluetoothDevice d = _devices.get(i);
+                if (!DeviceAllowed(d)){
+                    continue;
+                }
                 b.append(d.getAddress());
                 b.append('\n');
                 b.append(d.getName());
@@ -160,7 +191,6 @@ public class bluetoothInit extends ListActivity
     /* Select device */
     protected void onListItemClick(ListView l, View v, int position, long id)
     {
-        // TODO: connect and send data!!!!!
         Log.d("EF-BTBee", ">>Click device");
         Intent result = new Intent();
         result.putExtra(BluetoothDevice.EXTRA_DEVICE, _devices.get(position));

@@ -2,6 +2,7 @@ package brasnore.elctrowake;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
@@ -12,24 +13,21 @@ import android.view.View;
 import android.widget.Toast;
 
 import brasnore.elctrowake.bluetooth.bluetoothInit;
+import brasnore.elctrowake.bluetooth.BluetoothUtils;
 
+import static brasnore.elctrowake.bluetooth.BluetoothUtils.REQUEST_DISCOVERY;
 
 @TargetApi(23)
 public class MainActivity extends AppCompatActivity {
 
     static public final int REQUEST_ENABLE_BT = 3;
-    private static Context context;
+    private BluetoothUtils BU = new BluetoothUtils();
 
     public static final String EXTRA_MESSAGE = "LOL";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        MainActivity.context = getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    }
-
-    public static Context getAppContext() {
-        return MainActivity.context;
     }
 
     public void recordAudio(View view) {
@@ -50,9 +48,23 @@ public class MainActivity extends AppCompatActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-        else{
-            Intent intent = new Intent(this, bluetoothInit.class);
-            startActivity(intent);
+
+        Intent intent = new Intent(this, bluetoothInit.class);
+		/* Select device for list */
+        startActivityForResult(intent, REQUEST_DISCOVERY);
+
+    }
+
+    /* after select, connect to device */
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_DISCOVERY) {
+
+            final BluetoothDevice device = data.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            new Thread() {
+                public void run() {
+                    BU.connect(device);
+                }
+            }.start();
         }
     }
 

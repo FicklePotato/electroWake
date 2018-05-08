@@ -3,6 +3,6 @@
     <string name="input">Write some shit down</string>
     <string name="trademark">brought to you by T&amp;T</string>
     <string name="record_button">Record</string>
-    <string name="bluetooth_button">Bluetooth</string>
+    <string name="bluetooth_button">Use vibrate</string>
     <string name="bluetooth_not_supported">bluetooth must be supported on device to operate!</string>
 </resources>
